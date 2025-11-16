@@ -1,0 +1,58 @@
+# -----------------------------------------------------
+# Root Git Ignore for Full KYC App (Mobile + Admin + Backend)
+# -----------------------------------------------------
+
+# Node modules (all projects)
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Environment files (VERY IMPORTANT)
+.env
+.env.local
+.env.*.local
+backend/.env
+admin-panel/.env
+mobile-app/.env
+
+# Dist / Build
+dist/
+build/
+.expo/
+.expo-shared/
+
+# Expo / React Native specific
+.android/
+.ios/
+*.apk
+*.aab
+*.keystore
+
+# Metro bundler cache
+.expo/
+.expo-shared/
+.packager/
+.metro/
+
+# Vite
+*.tsbuildinfo
+
+# macOS + Windows
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Cache
+.cache/
+.expo/
+.next/
+.tmp/
+temp/
