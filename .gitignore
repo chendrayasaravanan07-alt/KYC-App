@@ -1,58 +1,75 @@
-# -----------------------------------------------------
-# Root Git Ignore for Full KYC App (Mobile + Admin + Backend)
-# -----------------------------------------------------
+# -------------------------
+# GLOBAL IGNORE
+# -------------------------
+.DS_Store
+Thumbs.db
 
-# Node modules (all projects)
-node_modules/
+# Environment files (backend/admin/mobile)
+.env
+.env.*
+!.env.example
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-*.log
 
-# Environment files (VERY IMPORTANT)
-.env
-.env.local
-.env.*.local
-backend/.env
-admin-panel/.env
-mobile-app/.env
-
-# Dist / Build
-dist/
-build/
+# -------------------------
+# MOBILE APP (React Native + Expo)
+# -------------------------
+mobile-app/node_modules/
 .expo/
 .expo-shared/
+dist/
+web-build/
+expo-env.d.ts
 
-# Expo / React Native specific
-.android/
-.ios/
-*.apk
-*.aab
-*.keystore
+# Native generated folders
+ios/
+android/
+.kotlin/
+
+# Certificates / signing files
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
 # Metro bundler cache
-.expo/
-.expo-shared/
-.packager/
-.metro/
+.metro-health-check*
 
-# Vite
+# TypeScript build info
 *.tsbuildinfo
 
-# macOS + Windows
-.DS_Store
-Thumbs.db
+# -------------------------
+# BACKEND (Node.js + Express)
+# -------------------------
+backend/node_modules/
+backend/logs/
+backend/tmp/
+backend/.cache/
 
-# IDE files
-.vscode/
-.idea/
+# PM2 / runtime files
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# Cache
-.cache/
-.expo/
-.next/
-.tmp/
-temp/
+# Production build
+backend/build/
+
+# -------------------------
+# ADMIN PANEL (React Web)
+# -------------------------
+admin-panel/node_modules/
+admin-panel/.cache/
+admin-panel/build/
+admin-panel/dist/
+
+# -------------------------
+# OS / System files
+# -------------------------
+*.pem
+*.orig.*
