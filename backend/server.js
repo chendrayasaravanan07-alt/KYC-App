@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const { connectDB } = require('./src/utils/db');
 const { createServer } = require('http');
+const websocketService = require('./src/services/websocket.service');
 
 // Create Express app
 const app = express();
