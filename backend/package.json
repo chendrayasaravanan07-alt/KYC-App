@@ -9,12 +9,29 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "AI-Driven KYC Verification System Backend",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "mongoose": "^8.0.0",
+    "tesseract.js": "^5.0.0",
+    "face-recognition": "^0.3.1",
+    "crypto-js": "^4.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "joi": "^17.11.0",
+    "node-fetch": "^3.3.2",
+    "winston": "^3.11.0",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.0",
+    "socket.io": "^4.7.0",
+    "cloudinary": "^1.41.0",
+    "sharp": "^0.32.0",
+    "express-validator": "^7.0.0",
+    "compression": "^1.7.4",
+    "express-mongo-sanitize": "^2.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
