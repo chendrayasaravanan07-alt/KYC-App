@@ -1,0 +1,74 @@
+{
+  "folders": [
+    {
+      "name": "🚀 KYC System",
+      "path": "."
+    },
+    {
+      "name": "🔧 Backend API",
+      "path": "./backend"
+    },
+    {
+      "name": "🎨 Admin Panel",
+      "path": "./admin-panel"
+    },
+    {
+      "name": "📱 Mobile App",
+      "path": "./mobile-app"
+    }
+  ],
+  "settings": {
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/Thumbs.db": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/bower_components": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/.git": true,
+      "**/.DS_Store": true
+    },
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": []
+  },
+  "tasks": {
+    "version": "2.0.0"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-json",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-typescript-next",
+      "formulahendry.auto-rename-tag",
+      "christian-kohler.path-intellisense",
+      "ms-vscode.vscode-jest",
+      "humao.rest-client",
+      "ms-vscode.vscode-thunder-client",
+      "ms-vscode-remote.remote-containers",
+      "ms-vscode.vscode-docker",
+      "gruntfuggly.todo-tree",
+      "wayou.vscode-todo-highlight",
+      "streetsidesoftware.code-spell-checker",
+      "ms-vscode.vscode-git-graph",
+      "eamodio.gitlens",
+      "ms-vscode.vscode-live-server"
+    ]
+  }
+}
