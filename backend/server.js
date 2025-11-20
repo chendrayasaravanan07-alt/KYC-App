@@ -146,12 +146,17 @@ const startServer = async () => {
     await connectDB();
     console.log('✅ Database connected successfully');
 
+    // Initialize WebSocket service
+    websocketService.initialize(server);
+    console.log('🔌 WebSocket service initialized');
+
     // Start server
     const PORT = process.env.PORT || 5000;
     server.listen(PORT, () => {
       console.log(`🚀 AI-Driven KYC Server running on http://localhost:${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+      console.log(`🔌 WebSocket server running on ws://localhost:${PORT}`);
     });
 
   } catch (error) {
