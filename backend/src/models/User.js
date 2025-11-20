@@ -141,6 +141,8 @@ userSchema.index({ 'profile.lastLocation': '2dsphere' });
 userSchema.index({ email: 1 });
 userSchema.index({ phone: 1 });
 userSchema.index({ 'profile.kycStatus': 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ isSuspended: 1 });
 userSchema.index({ createdAt: -1 });
 
 // Virtual for checking if account is locked
