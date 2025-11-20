@@ -100,6 +100,27 @@ const userSchema = new mongoose.Schema({
     default: 0
   },
   lockUntil: Date,
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'verifier'],
+    default: 'user'
+  },
+  // Suspension fields
+  isSuspended: {
+    type: Boolean,
+    default: false
+  },
+  suspensionReason: String,
+  suspendedAt: Date,
+  suspendedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  activatedAt: Date,
+  activatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   auditLogs: [{
     action: String,
     timestamp: { type: Date, default: Date.now },
