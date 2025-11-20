@@ -1,0 +1,55 @@
+{
+  "workbench.colorTheme": "Default Dark+",
+  "workbench.iconTheme": "vs-seti",
+  "editor.fontSize": 14,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.wordWrap": "on",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  },
+  "emmet.triggerExpansionOnTab": true,
+  "terminal.integrated.shell.linux": "/bin/bash",
+  "terminal.integrated.shell.osx": "/bin/zsh",
+  "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
+  "python.terminal.activateEnvironment": true,
+  "npm.enableScriptExplorer": true,
+  "eslint.workingDirectories": ["backend", "admin-panel"],
+  "prettier.configPath": ".prettierrc",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.js": "${capture}.js.map, ${capture}.d.ts, ${capture}.min.js",
+    "*.jsx": "${capture}.js, ${capture}.d.ts",
+    "package.json": "package-lock.json, yarn.lock",
+    ".env": ".env.*",
+    "*.css": "*.min.css",
+    "*.scss": "*.min.css"
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.git": true,
+    "**/.DS_Store": true
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "javascript.suggest.autoImports": true,
+  "liveServer.settings.port": 5500,
+  "liveServer.settings.root": "/admin-panel/dist"
+}
