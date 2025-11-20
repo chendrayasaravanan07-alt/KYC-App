@@ -1,0 +1,80 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Backend Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/server-simple.js",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "restart": true,
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--inspect"],
+      "outputCapture": "std",
+      "presentation": {
+        "hidden": false,
+        "group": "KYC System",
+        "order": 1
+      }
+    },
+    {
+      "name": "Debug Backend (Production Mode)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/server.js",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "development",
+        "MONGODB_URI": "mongodb://localhost:27017/kyc_system",
+        "JWT_SECRET": "dev-secret-key",
+        "BACKEND_PORT": "5000"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "restart": true,
+      "presentation": {
+        "hidden": false,
+        "group": "KYC System",
+        "order": 2
+      }
+    },
+    {
+      "name": "Debug Backend with MongoDB",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/server.js",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "development",
+        "MONGODB_URI": "mongodb://localhost:27017/kyc_system",
+        "JWT_SECRET": "dev-secret-key-change-in-production",
+        "BACKEND_PORT": "5000",
+        "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:5173"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "preLaunchTask": "Start MongoDB",
+      "restart": true,
+      "presentation": {
+        "hidden": false,
+        "group": "KYC System",
+        "order": 3
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Full KYC System",
+      "configurations": ["Debug Backend Server"],
+      "presentation": {
+        "hidden": false,
+        "group": "KYC System"
+      }
+    }
+  ]
+}
