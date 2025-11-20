@@ -94,8 +94,8 @@ app.use('/api/auth', require('./src/routes/auth.routes'));
 app.use('/api/kyc', require('./src/routes/kyc.routes'));
 app.use('/api/admin', require('./src/routes/admin.routes'));
 
-// 404 handler
-app.use('*', (req, res) => {
+// 404 handler - use a regex for catch-all route
+app.all('*', (req, res) => {
   res.status(404).json({
     success: false,
     message: 'Route not found',
