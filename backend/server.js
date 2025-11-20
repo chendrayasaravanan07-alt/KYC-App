@@ -1,19 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const kycRoutes = require("./src/routes/kyc.routes");
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-// Simple test route
-app.get('/', (req, res) => {
-  res.json({ success: true, message: 'KYC Backend Running!' });
-});
+app.use("/kyc", kycRoutes);
 
-// Server listen
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+app.listen(5000, () => console.log("Backend running on port 5000"));
