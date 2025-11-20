@@ -542,39 +542,95 @@ router.get('/analytics', [
 router.get('/users', [
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
-  query('kycStatus').optional().isIn(['pending', 'verified', 'rejected', 'in_progress']),
-  query('search').optional().isLength({ max: 100 })
+  query('status').optional().isIn(['active', 'suspended', 'inactive', 'pending']),
+  query('kycStatus').optional().isIn(['pending', 'verified', 'rejected', 'not_started', 'in_progress']),
+  query('role').optional().isIn(['user', 'admin', 'verifier']),
+  query('search').optional().isLength({ max: 100 }),
+  query('dateFrom').optional().isISO8601(),
+  query('dateTo').optional().isISO8601()
 ], async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
     const {
       page = 1,
-      limit = 20,
+      limit = 10,
+      status,
       kycStatus,
-      search
+      role,
+      search,
+      dateFrom,
+      dateTo,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
     } = req.query;
 
+    // Build query
     const query = {};
+
+    if (status) {
+      if (status === 'active') {
+        query.isActive = true;
+      } else if (status === 'suspended') {
+        query.isSuspended = true;
+      } else if (status === 'inactive') {
+        query.isActive = false;
+      } else if (status === 'pending') {
+        query.isActive = false;
+        query.isEmailVerified = false;
+      }
+    }
 
     if (kycStatus) {
       query['profile.kycStatus'] = kycStatus;
     }
 
+    if (role) {
+      query.role = role;
+    }
+
     if (search) {
       query.$or = [
         { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-        { 'profile.name': { $regex: search, $options: 'i' } }
+        { 'profile.phone': { $regex: search, $options: 'i' } },
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $concat: ['$profile.firstName', ' ', '$profile.lastName'] },
+              regex: search,
+              options: 'i'
+            }
+          }
+        }
       ];
     }
+
+    // Date range filter
+    if (dateFrom || dateTo) {
+      query.createdAt = {};
+      if (dateFrom) query.createdAt.$gte = new Date(dateFrom);
+      if (dateTo) query.createdAt.$lte = new Date(dateTo);
+    }
+
+    // Build sort object
+    const sort = {};
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([
       User.find(query)
         .select('-password -emailVerificationToken -phoneVerificationOTP -passwordResetToken')
-        .sort({ createdAt: -1 })
+        .sort(sort)
         .skip(skip)
-        .limit(limit),
+        .limit(parseInt(limit)),
       User.countDocuments(query)
     ]);
 
@@ -584,20 +640,24 @@ router.get('/users', [
       success: true,
       data: {
         users: users.map(user => ({
-          id: user._id,
+          _id: user._id,
           email: user.email,
-          phone: user.phone,
           profile: user.profile,
-          isActive: user.isActive,
+          role: user.role || 'user',
+          status: user.isSuspended ? 'suspended' : (user.isActive ? 'active' : 'inactive'),
           isEmailVerified: user.isEmailVerified,
           isPhoneVerified: user.isPhoneVerified,
           lastLoginAt: user.lastLoginAt,
-          createdAt: user.createdAt
+          loginAttempts: user.loginAttempts,
+          lockUntil: user.lockUntil,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
         })),
         pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalUsers: total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: totalPages,
           hasNextPage: page < totalPages,
           hasPrevPage: page > 1
         }
@@ -609,6 +669,297 @@ router.get('/users', [
     res.status(500).json({
       success: false,
       message: 'Error fetching users'
+    });
+  }
+});
+
+/**
+ * @route   GET /api/admin/users/:id
+ * @desc    Get detailed user information
+ * @access  Private (Admin only)
+ */
+router.get('/users/:id', [
+  query('id').isMongoId().withMessage('Invalid user ID')
+], async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id)
+      .select('-password -emailVerificationToken -phoneVerificationOTP -passwordResetToken');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Get user's KYC applications
+    const kycApplications = await KYC.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select('applicationId status createdAt riskAssessment');
+
+    // Decrypt sensitive data for admin view
+    user.decryptSensitiveFields();
+
+    res.json({
+      success: true,
+      data: {
+        user: {
+          _id: user._id,
+          email: user.email,
+          profile: user.profile,
+          role: user.role || 'user',
+          status: user.isSuspended ? 'suspended' : (user.isActive ? 'active' : 'inactive'),
+          isEmailVerified: user.isEmailVerified,
+          isPhoneVerified: user.isPhoneVerified,
+          lastLoginAt: user.lastLoginAt,
+          loginAttempts: user.loginAttempts,
+          lockUntil: user.lockUntil,
+          auditLog: user.auditLog?.slice(-20), // Last 20 audit entries
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        },
+        kycApplications,
+        statistics: {
+          totalKYCApplications: kycApplications.length,
+          verifiedKYC: kycApplications.filter(kyc => kyc.status === 'verified').length,
+          pendingKYC: kycApplications.filter(kyc => kyc.status === 'pending').length,
+          rejectedKYC: kycApplications.filter(kyc => kyc.status === 'rejected').length,
+          averageRiskScore: kycApplications.reduce((acc, kyc) => acc + (kyc.riskAssessment?.score || 0), 0) / kycApplications.length || 0
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('User detail fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching user details'
+    });
+  }
+});
+
+/**
+ * @route   PUT /api/admin/users/:id
+ * @desc    Update user information
+ * @access  Private (Admin only)
+ */
+router.put('/users/:id', [
+  body('profile.firstName').optional().isLength({ min: 1, max: 50 }).trim(),
+  body('profile.lastName').optional().isLength({ min: 1, max: 50 }).trim(),
+  body('profile.phone').optional().isMobilePhone('any'),
+  body('profile.address').optional().isLength({ max: 200 }).trim(),
+  body('role').optional().isIn(['user', 'admin', 'verifier']),
+  body('notes').optional().isLength({ max: 1000 }).trim()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { id } = req.params;
+    const updates = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update user data
+    const allowedUpdates = ['profile', 'role'];
+    const actualUpdates = {};
+
+    Object.keys(updates).forEach(key => {
+      if (allowedUpdates.includes(key)) {
+        if (key === 'profile') {
+          actualUpdates[key] = { ...user.profile, ...updates[key] };
+        } else {
+          actualUpdates[key] = updates[key];
+        }
+      }
+    });
+
+    // Don't allow admin to change their own role
+    if (updates.role && user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot change your own role'
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { ...actualUpdates, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    ).select('-password -emailVerificationToken -phoneVerificationOTP -passwordResetToken');
+
+    // Log admin action
+    await user.addAuditLog('user_updated_by_admin', {
+      adminId: req.user._id,
+      adminEmail: req.user.email,
+      updatedFields: Object.keys(actualUpdates),
+      notes: updates.notes
+    }, req.ip, req.get('User-Agent'));
+
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      data: {
+        user: updatedUser
+      }
+    });
+
+  } catch (error) {
+    console.error('User update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating user'
+    });
+  }
+});
+
+/**
+ * @route   POST /api/admin/users/:id/suspend
+ * @desc    Suspend user account
+ * @access  Private (Admin only)
+ */
+router.post('/users/:id/suspend', [
+  body('reason').notEmpty().withMessage('Suspension reason is required').isLength({ max: 500 }).trim(),
+  body('notes').optional().isLength({ max: 1000 }).trim()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { id } = req.params;
+    const { reason, notes } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Don't allow admin to suspend themselves
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot suspend your own account'
+      });
+    }
+
+    if (user.isSuspended) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is already suspended'
+      });
+    }
+
+    // Suspend user
+    user.isSuspended = true;
+    user.suspensionReason = reason;
+    user.suspendedAt = new Date();
+    user.suspendedBy = req.user._id;
+    await user.save();
+
+    // Log admin action
+    await user.addAuditLog('user_suspended_by_admin', {
+      adminId: req.user._id,
+      adminEmail: req.user.email,
+      reason,
+      notes
+    }, req.ip, req.get('User-Agent'));
+
+    res.json({
+      success: true,
+      message: 'User suspended successfully',
+      data: {
+        userId: user._id,
+        suspensionReason: reason,
+        suspendedAt: user.suspendedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('User suspension error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error suspending user'
+    });
+  }
+});
+
+/**
+ * @route   POST /api/admin/users/:id/activate
+ * @desc    Activate suspended user account
+ * @access  Private (Admin only)
+ */
+router.post('/users/:id/activate', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (!user.isSuspended) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is not suspended'
+      });
+    }
+
+    // Activate user
+    user.isSuspended = false;
+    user.suspensionReason = undefined;
+    user.suspendedAt = undefined;
+    user.suspendedBy = undefined;
+    user.activatedAt = new Date();
+    user.activatedBy = req.user._id;
+    await user.save();
+
+    // Log admin action
+    await user.addAuditLog('user_activated_by_admin', {
+      adminId: req.user._id,
+      adminEmail: req.user.email
+    }, req.ip, req.get('User-Agent'));
+
+    res.json({
+      success: true,
+      message: 'User activated successfully',
+      data: {
+        userId: user._id,
+        activatedAt: user.activatedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('User activation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error activating user'
     });
   }
 });
