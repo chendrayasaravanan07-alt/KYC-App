@@ -132,6 +132,18 @@ function AppContent() {
           }
         />
         <Route
+          path="/users/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <UserDetails />
+                </Suspense>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/analytics"
           element={
             <ProtectedRoute>
