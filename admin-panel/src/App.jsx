@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 const KYCApplications = React.lazy(() => import('./pages/KYCApplications'));
 const KYCDetails = React.lazy(() => import('./pages/KYCDetails'));
 const Users = React.lazy(() => import('./pages/Users'));
+const UserDetails = React.lazy(() => import('./pages/UserDetails'));
 const Analytics = React.lazy(() => import('./pages/Analytics'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 
