@@ -1,0 +1,174 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Backend Server (Simple)",
+      "type": "shell",
+      "command": "node",
+      "args": ["backend/server-simple.js"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false,
+        "group": "KYC System"
+      },
+      "problemMatcher": [],
+      "detail": "Start mock backend server for development"
+    },
+    {
+      "label": "Start Backend Server (Full)",
+      "type": "shell",
+      "command": "node",
+      "args": ["backend/server.js"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false,
+        "group": "KYC System"
+      },
+      "problemMatcher": [],
+      "detail": "Start full backend server with MongoDB"
+    },
+    {
+      "label": "Start Admin Panel",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "options": {
+        "cwd": "${workspaceFolder}/admin-panel"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false,
+        "group": "KYC System"
+      },
+      "problemMatcher": [],
+      "detail": "Start React admin panel development server"
+    },
+    {
+      "label": "Install Backend Dependencies",
+      "type": "shell",
+      "command": "npm",
+      "args": ["install"],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install Admin Panel Dependencies",
+      "type": "shell",
+      "command": "npm",
+      "args": ["install"],
+      "options": {
+        "cwd": "${workspaceFolder}/admin-panel"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start MongoDB",
+      "type": "shell",
+      "command": "mongod",
+      "args": ["--dbpath", "${workspaceFolder}/data/db"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false,
+        "group": "Database"
+      },
+      "problemMatcher": [],
+      "detail": "Start MongoDB server",
+      "isBackground": true
+    },
+    {
+      "label": "Start Redis",
+      "type": "shell",
+      "command": "redis-server",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false,
+        "group": "Database"
+      },
+      "problemMatcher": [],
+      "detail": "Start Redis server",
+      "isBackground": true
+    },
+    {
+      "label": "Setup Project",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "Install Backend Dependencies",
+        "Install Admin Panel Dependencies"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "detail": "Install all project dependencies"
+    },
+    {
+      "label": "Start Full Development Environment",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "Start Backend Server (Simple)",
+        "Start Admin Panel"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false,
+        "group": "KYC System"
+      },
+      "detail": "Start both backend and frontend for full development"
+    }
+  ]
+}
